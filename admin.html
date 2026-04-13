@@ -76,7 +76,6 @@
     /* ── MAP ── */
     #map-wrap { position: relative; width: 100%; height: 100%; }
     #map { width: 100%; height: 100%; }
-    .leaflet-tile { filter: brightness(0.38) saturate(0.4) hue-rotate(75deg); }
     .leaflet-container { background: #090b0a; }
 
     /* ── VISITORS PANEL ── */
@@ -285,7 +284,122 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .wait-text { font-family: 'Courier New', monospace; font-size: 11px; color: var(--muted); }
 
+    /* ── LAYER SWITCHER ── */
+    #layer-switcher {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 850;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #layer-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(11, 13, 12, 0.92);
+      border: 1px solid #1E2320;
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    #layer-btn:hover {
+      border-color: var(--green);
+      background: rgba(37, 211, 102, 0.1);
+    }
+
+    #layer-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(11, 13, 12, 0.95);
+      border: 1px solid #1E2320;
+      border-radius: 8px;
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    #layer-menu.hidden {
+      display: none;
+    }
+
+    #layer-menu button {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      color: var(--muted);
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    #layer-menu button:hover {
+      background: rgba(37, 211, 102, 0.1);
+      color: var(--green);
+    }
+
+    #layer-menu button.active {
+      color: var(--green);
+      background: rgba(37, 211, 102, 0.08);
+      border-left: 2px solid var(--green);
+      padding-left: 10px;
+    }
+
     @media (max-width: 767px) {
+      header {
+        padding: 0 10px;
+        gap: 6px;
+        height: 40px;
+      }
+
+      .layout {
+        grid-template-rows: 40px 1fr;
+      }
+
+      .dot {
+        width: 5px;
+        height: 5px;
+      }
+
+      .header-title {
+        font-size: 8px;
+        letter-spacing: 0.08em;
+      }
+
+      .header-right {
+        gap: 8px;
+      }
+
+      #btn-visitors {
+        padding: 3px 8px;
+        font-size: 9px;
+        gap: 3px;
+        border-radius: 12px;
+      }
+
+      .poll-badge {
+        display: none;
+      }
+
+      #status-text {
+        font-size: 8px;
+      }
+
       .visitors-panel {
         top: 12px;
         right: 12px;
@@ -297,11 +411,16 @@
       }
 
       #info-card {
+        position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        width: 100%;
-        border-radius: 12px 12px 0 0;
+        width: 100vw;
+        max-width: 100vw;
+        border-radius: 16px 16px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
       }
 
       .vp-list {
@@ -313,6 +432,20 @@
       .grid-cell:nth-child(3),
       .grid-cell:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
     }
+
+    /* Mobile layer switcher */
+    @media (max-width: 767px) {
+      #layer-switcher {
+        left: 12px;
+        top: 50%;
+      }
+
+      #layer-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -323,7 +456,7 @@
     <span class="header-title">K-Track</span>
     <div class="header-right">
       <button id="btn-visitors" onclick="toggleVisitorsDrawer()">
-        👥 Visiteurs <span id="visitors-count">(0)</span>
+         Visiteurs <span id="visitors-count">(0)</span>
       </button>
       <span class="poll-badge">↻ 5s</span>
       <span id="status-text">En attente…</span>
@@ -332,6 +465,19 @@
 
   <div id="map-wrap">
     <div id="map"></div>
+
+    <div id="layer-switcher">
+      <button id="layer-btn" onclick="toggleLayerMenu()" title="Changer de calque">
+        🗺
+      </button>
+      <div id="layer-menu" class="hidden">
+        <button onclick="switchLayer('Standard')">Standard</button>
+        <button onclick="switchLayer('Satellite')">Satellite</button>
+        <button onclick="switchLayer('Terrain')">Terrain</button>
+        <button onclick="switchLayer('Sombre')">Sombre</button>
+        <button onclick="switchLayer('Minimal')">Minimal</button>
+      </div>
+    </div>
 
     <div id="visitors-panel" class="visitors-panel">
       <div class="vp-header" onclick="toggleVisitorsPanel()">
@@ -389,13 +535,23 @@
   const JSONBIN_API_KEY = '$2a$10$.36nNBRUdpE3TtbHXEHEGunOtJSZuVMN9.JO8iefwRLUZ09KoBMIG';
 
   const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([5.35, -4.0], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   L.control.zoom({ position: 'topleft' }).addTo(map);
+
+  const layers = {
+    'Standard': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+    'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
+    'Terrain':   L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+    'Sombre':    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'),
+    'Minimal':   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'),
+  };
+
+  let currentLayer = layers['Sombre'];
+  currentLayer.addTo(map);
+  document.querySelector('.leaflet-tile-pane').style.filter = 'none';
 
   let visits = [];
   let selectedVisitId = null;
   let markersMap = new Map();
-  let trailsMap = new Map();
   let hasInitialData = false;
   let lastKnownLength = 0;
   let panelOpen = window.innerWidth >= 768;
@@ -403,6 +559,41 @@
   function isMobile() {
     return window.innerWidth < 768;
   }
+
+  function toggleLayerMenu() {
+    const menu = document.getElementById('layer-menu');
+    menu.classList.toggle('hidden');
+  }
+
+  function switchLayer(name) {
+    map.removeLayer(currentLayer);
+    currentLayer = layers[name];
+    currentLayer.addTo(map);
+
+    const darkLayers = ['Standard', 'Terrain', 'Minimal'];
+    const tilePane = document.querySelector('.leaflet-tile-pane');
+    if (darkLayers.includes(name)) {
+      tilePane.style.filter = 'brightness(0.38) saturate(0.4) hue-rotate(75deg)';
+    } else {
+      tilePane.style.filter = 'none';
+    }
+
+    document.querySelectorAll('#layer-menu button').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent === name);
+    });
+
+    document.getElementById('layer-menu').classList.add('hidden');
+  }
+
+  map.on('click', () => {
+    document.getElementById('layer-menu').classList.add('hidden');
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const defaultBtn = [...document.querySelectorAll('#layer-menu button')]
+      .find(b => b.textContent === 'Sombre');
+    if (defaultBtn) defaultBtn.classList.add('active');
+  });
 
   function createMarkerIcon(visit, idx) {
     const isLatest = idx === visits.length - 1;
@@ -512,22 +703,6 @@
       markersMap.get(visit.id).marker.setLatLng([visit.lat, visit.lng]);
     }
 
-    if (visit.trail && visit.trail.length > 1) {
-      const trailCoords = visit.trail.map(p => [p.lat, p.lng]);
-
-      if (trailsMap.has(visit.id)) {
-        trailsMap.get(visit.id).setLatLngs(trailCoords);
-      } else {
-        const polyline = L.polyline(trailCoords, {
-          color: '#25D366',
-          weight: 3,
-          opacity: 0.7,
-          dashArray: '6, 4'
-        }).addTo(map);
-        trailsMap.set(visit.id, polyline);
-      }
-    }
-
     const time = formatTime(visit.timestamp);
     document.getElementById('card-time').textContent = time;
     document.getElementById('val-lat').textContent = visit.lat.toFixed(6);
@@ -581,13 +756,6 @@
 
           if (currentLatLng.lat !== visit.lat || currentLatLng.lng !== visit.lng) {
             existing.marker.setLatLng([visit.lat, visit.lng]);
-          }
-
-          if (selectedVisitId === visit.id && visit.trail && visit.trail.length > 1) {
-            const trailCoords = visit.trail.map(p => [p.lat, p.lng]);
-            if (trailsMap.has(visit.id)) {
-              trailsMap.get(visit.id).setLatLngs(trailCoords);
-            }
           }
         } else {
           addMarker(visit, idx);
