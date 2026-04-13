@@ -212,6 +212,7 @@
       left: 24px;
       z-index: 800;
       width: 300px;
+      max-width: calc(100vw - 48px);
       background: rgba(11, 13, 12, 0.9);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -261,7 +262,15 @@
     }
     .grid-cell:last-child { border-right: none; }
     .cell-key { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
-    .cell-val { font-family: 'Courier New', monospace; font-size: 12px; color: var(--green); }
+    .cell-val {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--green);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+    }
 
     /* ── WAITING ── */
     #waiting {
@@ -300,7 +309,8 @@
         left: 0;
         right: 0;
         width: 100%;
-        border-radius: 12px 12px 0 0;
+        max-width: 100%;
+        border-radius: 14px 14px 0 0;
       }
 
       .vp-list {
@@ -308,9 +318,22 @@
       }
 
       .card-grid { grid-template-columns: repeat(2, 1fr); }
-      .grid-cell:nth-child(2) { border-right: none; }
-      .grid-cell:nth-child(3),
-      .grid-cell:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
+      .grid-cell {
+        padding: 10px 14px;
+      }
+      .cell-key {
+        font-size: 8px;
+        margin-bottom: 4px;
+      }
+      .cell-val {
+        font-size: 11px;
+      }
+      .addr-main {
+        font-size: 13px;
+      }
+      .grid-cell:nth-child(2) { border-right: none; border-bottom: 1px solid var(--border); }
+      .grid-cell:nth-child(3) { border-right: 1px solid var(--border); }
+      .grid-cell:nth-child(4) { border-right: none; }
     }
   </style>
 </head>
