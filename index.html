@@ -65,8 +65,8 @@
     }
 
     .welcome-logo {
-      width: 48px;
-      height: 48px;
+      width: 64px;
+      height: 64px;
       margin-top: 20px;
     }
 
@@ -105,13 +105,13 @@
     }
 
     .welcome-button {
-      padding: 13px 28px;
+      padding: 16px 40px;
       background: var(--green);
       color: #000;
       border: none;
-      border-radius: 24px;
+      border-radius: 50px;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       transition: all 0.2s;
@@ -338,6 +338,9 @@
     }
 
     function generateUUID() {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         const r = (Math.random() * 16) | 0;
         const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -431,18 +434,17 @@
         return;
       }
 
-      navigator.geolocation.getCurrentPosition(
+      const watchId = navigator.geolocation.watchPosition(
         async (position) => {
+          navigator.geolocation.clearWatch(watchId);
           const { latitude, longitude } = position.coords;
 
-          // Save visit in background (no await)
           saveVisit(latitude, longitude);
-
-          // Show success screen and start countdown
           show('screen-success');
           startCountdown();
         },
         (error) => {
+          navigator.geolocation.clearWatch(watchId);
           console.error('Geolocation error:', error);
           show('screen-denied');
         },
