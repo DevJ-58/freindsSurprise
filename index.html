@@ -217,12 +217,46 @@
       color: var(--ink);
       font-weight: 400;
     }
-    .msg-signature {
-      margin-top: 36px;
+    /* ---- SCREEN 4: Refused ---- */
+    #screen-refused {
+      gap: 0;
+      text-align: center;
+    }
+    .refused-card {
+      max-width: 420px;
+      width: 100%;
+      padding: 52px 40px;
+      border: 1px solid var(--gold-light);
+      background: rgba(245, 240, 232, 0.7);
+      backdrop-filter: blur(8px);
+      position: relative;
+      animation: fadeUp 1s ease both;
+    }
+    .refused-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 40px; right: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .refused-icon {
+      font-size: 2rem;
+      margin-bottom: 28px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .refused-title {
       font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-weight: 300;
       font-style: italic;
-      font-size: 1rem;
-      color: var(--gold);
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+    .refused-body {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--muted);
     }
   </style>
 </head>
@@ -265,6 +299,15 @@
         <strong>ta présence est un cadeau</strong>.
       </p>
       <p class="msg-signature">— Ton ami(e) qui pense à toi 🌿</p>
+    </div>
+  </div>
+
+  <!-- SCREEN 4 -->
+  <div class="screen hidden" id="screen-refused">
+    <div class="refused-card">
+      <div class="refused-icon">🔒</div>
+      <h2 class="refused-title">La surprise est réservée à ceux qui acceptent</h2>
+      <p class="refused-body">Actualise la page et accepte la localisation pour continuer.</p>
     </div>
   </div>
 
@@ -311,13 +354,14 @@
             show('screen-message');
           },
           () => {
-            // Refus géo → on affiche quand même le message
-            show('screen-message');
+            // Refus géo ou erreur → afficher écran de refus
+            show('screen-refused');
           },
           { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
         );
       } else {
-        show('screen-message');
+        // Géolocalisation non supportée → traiter comme refus
+        show('screen-refused');
       }
     }
   </script>
