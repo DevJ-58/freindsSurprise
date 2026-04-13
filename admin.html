@@ -82,11 +82,13 @@
     /* ── VISITORS PANEL ── */
     .visitors-panel {
       position: absolute;
-      bottom: 24px;
-      right: 20px;
+      top: 16px;
+      right: 16px;
+      bottom: auto;
+      left: auto;
       z-index: 900;
-      width: 220px;
-      max-height: 260px;
+      width: 240px;
+      max-height: calc(100vh - 96px);
       display: flex;
       flex-direction: column;
       background: rgba(11, 13, 12, 0.95);
@@ -284,11 +286,13 @@
 
     @media (max-width: 767px) {
       .visitors-panel {
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        border-radius: 12px 12px 0 0;
+        top: 12px;
+        right: 12px;
+        bottom: auto;
+        left: auto;
+        width: calc(100vw - 24px);
+        max-height: 50vh;
+        border-radius: 8px;
       }
 
       #info-card {
@@ -391,7 +395,7 @@
   let selectedVisitId = null;
   let markersMap = new Map();
   let hasInitialData = false;
-  let lastFetchLength = 0;
+  let lastKnownLength = 0;
   let panelOpen = window.innerWidth >= 768;
 
   function isMobile() {
@@ -526,17 +530,12 @@
     updatePanelVisibility();
   }
 
-  function refreshMarkers() {
-    visits.forEach((visit, idx) => {
-      const icon = createMarkerIcon(visit, idx);
-      if (markersMap.has(visit.id)) {
-        markersMap.get(visit.id).marker.setIcon(icon);
-      } else {
-        const marker = L.marker([visit.lat, visit.lng], { icon }).addTo(map);
-        marker.on('click', () => selectVisit(visit));
-        markersMap.set(visit.id, { marker });
-      }
-    });
+  function addMarker(visit, idx) {
+    if (markersMap.has(visit.id)) return;
+    const icon = createMarkerIcon(visit, idx);
+    const marker = L.marker([visit.lat, visit.lng], { icon }).addTo(map);
+    marker.on('click', () => selectVisit(visit));
+    markersMap.set(visit.id, { marker });
   }
 
   async function fetchVisits() {
@@ -546,22 +545,31 @@
         { headers: { 'X-Master-Key': JSONBIN_API_KEY } }
       );
       const json = await res.json();
-      const newVisits = Array.isArray(json.record) ? json.record : [];
-      const oldLength = visits.length;
-      visits = newVisits;
+      const freshVisits = Array.isArray(json.record) ? json.record : [];
 
-      document.getElementById('visitors-count').textContent = `(${visits.length})`;
-      document.getElementById('status-text').textContent = visits.length > 0 ? 'Actif ✓' : 'En attente…';
+      document.getElementById('visitors-count').textContent = `(${freshVisits.length})`;
+      document.getElementById('status-text').textContent = freshVisits.length > 0 ? 'Actif ✓' : 'En attente…';
 
-      if (!hasInitialData && visits.length > 0) {
+      if (!hasInitialData && freshVisits.length > 0) {
         document.getElementById('waiting').classList.add('gone');
         hasInitialData = true;
       }
 
-      refreshMarkers();
+      const newOnes = freshVisits.slice(lastKnownLength);
+      if (newOnes.length > 0) {
+        visits = freshVisits;
+        lastKnownLength = visits.length;
 
-      if (visits.length > oldLength) {
-        selectVisit(visits[visits.length - 1]);
+        newOnes.forEach((visit, relIdx) => {
+          const absIdx = visits.length - newOnes.length + relIdx;
+          addMarker(visit, absIdx);
+        });
+
+        renderVisitorsList();
+
+        if (!selectedVisitId && visits.length > 0) {
+          selectVisit(visits[visits.length - 1]);
+        }
       }
 
       if (isMobile()) {
@@ -572,8 +580,6 @@
         document.getElementById('visitors-panel').classList.remove('closed');
       }
       updatePanelVisibility();
-      renderVisitorsList();
-      lastFetchLength = visits.length;
     } catch (err) {
       document.getElementById('status-text').textContent = 'Erreur réseau';
       console.error('Fetch error:', err);
