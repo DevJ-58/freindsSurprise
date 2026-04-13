@@ -73,6 +73,28 @@
       border-color: var(--green);
     }
 
+    /* ── RESET BUTTON ── */
+    #btn-reset {
+      padding: 6px 14px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #btn-reset:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #f87171;
+    }
+
     /* ── MAP ── */
     #map-wrap { position: relative; width: 100%; height: 100%; }
     #map { width: 100%; height: 100%; }
@@ -392,6 +414,11 @@
         border-radius: 12px;
       }
 
+      #btn-reset {
+        padding: 3px 8px;
+        font-size: 9px;
+      }
+
       .poll-badge {
         display: none;
       }
@@ -456,12 +483,10 @@
     <span class="header-title">K-Track</span>
     <div class="header-right">
       <button id="btn-visitors" onclick="toggleVisitorsDrawer()">
-         Visiteurs <span id="visitors-count">(0)</span>
-      </button>
-      <span class="poll-badge">↻ 5s</span>
-      <span id="status-text">En attente…</span>
-    </div>
-  </header>
+           Visiteurs <span id="header-visitors-count">(0)</span>
+        </button>
+        <button id="btn-reset" onclick="resetAllVisits()">
+          ⟳ Réinitialiser
 
   <div id="map-wrap">
     <div id="map"></div>
@@ -483,7 +508,7 @@
       <div class="vp-header" onclick="toggleVisitorsPanel()">
         <div>
           <span class="vp-status">VISITEURS</span>
-          <span class="vp-count" id="visitors-count">(0)</span>
+          <span class="vp-count" id="panel-visitors-count">(0)</span>
         </div>
         <div class="vp-toggle" id="vp-toggle">▲</div>
       </div>
@@ -552,6 +577,7 @@
   let visits = [];
   let selectedVisitId = null;
   let markersMap = new Map();
+  let trailsMap = new Map();
   let hasInitialData = false;
   let lastKnownLength = 0;
   let panelOpen = window.innerWidth >= 768;
@@ -594,6 +620,61 @@
       .find(b => b.textContent === 'Sombre');
     if (defaultBtn) defaultBtn.classList.add('active');
   });
+
+  async function resetAllVisits() {
+    // Confirmation avant de tout supprimer
+    const confirmed = window.confirm(
+      '⚠️ Supprimer tous les visiteurs ?\nCette action est irréversible.'
+    );
+    if (!confirmed) return;
+
+    try {
+      // Réécrire le bin avec un tableau vide
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_API_KEY
+        },
+        body: JSON.stringify([])
+      });
+
+      if (!res.ok) {
+        alert('Erreur lors de la réinitialisation.');
+        return;
+      }
+
+      // Réinitialiser toute la mémoire locale
+      visits = [];
+      selectedVisitId = null;
+      lastKnownLength = 0;
+      hasInitialData = false;
+
+      // Supprimer tous les marqueurs de la carte
+      markersMap.forEach(({ marker }) => map.removeLayer(marker));
+      markersMap.clear();
+
+      // Supprimer tous les tracés (trails)
+      trailsMap.forEach(polyline => map.removeLayer(polyline));
+      trailsMap.clear();
+
+      // Vider la liste des visiteurs
+      document.getElementById('visitors-list').innerHTML = '';
+      document.getElementById('header-visitors-count').textContent = '(0)';
+      document.getElementById('panel-visitors-count').textContent = '(0)';
+      document.getElementById('status-text').textContent = 'En attente…';
+
+      // Cacher la card info
+      document.getElementById('info-card').classList.add('hidden');
+
+      // Réafficher le waiting overlay
+      document.getElementById('waiting').classList.remove('gone');
+
+    } catch (err) {
+      alert('Erreur réseau lors de la réinitialisation.');
+      console.error(err);
+    }
+  }
 
   function createMarkerIcon(visit, idx) {
     const isLatest = idx === visits.length - 1;
@@ -740,7 +821,8 @@
       const json = await res.json();
       const freshVisits = Array.isArray(json.record) ? json.record : [];
 
-      document.getElementById('visitors-count').textContent = `(${freshVisits.length})`;
+      document.getElementById('header-visitors-count').textContent = `(${freshVisits.length})`;
+      document.getElementById('panel-visitors-count').textContent = `(${freshVisits.length})`;
       document.getElementById('status-text').textContent = freshVisits.length > 0 ? 'Actif ✓' : 'En attente…';
 
       if (!hasInitialData && freshVisits.length > 0) {
