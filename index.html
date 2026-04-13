@@ -65,15 +65,31 @@
     }
 
     .welcome-logo {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: #1F2C34;
+      border: 1px solid #2A3942;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
       margin-top: 20px;
+      flex-shrink: 0;
     }
 
     .welcome-logo svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 0 12px var(--green-glow));
+      width: 38px;
+      height: 38px;
+      filter: none; /* supprimer l'ancien drop-shadow */
+    }
+
+    .logo-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 28px;
+      border: 1px solid rgba(37, 211, 102, 0.15);
+      pointer-events: none;
     }
 
     .welcome-content {
@@ -92,9 +108,26 @@
     }
 
     .welcome-title .emoji {
+      display: none; /* supprimer l'ancien emoji */
+    }
+
+    .welcome-badge {
       display: inline-block;
-      margin-left: 8px;
-      font-size: 1.1em;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(37, 211, 102, 0.08);
+      border: 1px solid rgba(37, 211, 102, 0.2);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: 'Courier New', monospace;
+      align-self: center;
+    }
+
+    .star {
+      color: var(--green);
+      font-style: normal;
     }
 
     .welcome-subtitle {
@@ -272,17 +305,27 @@
 <body>
   <!-- SCREEN 1: Accroche -->
   <div class="screen" id="screen-welcome">
-    <svg class="welcome-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.052 0-2.069.356-2.897 1.025l-.643-.381C5.554 2.612 3.663 1.776 1.561 1.776c-4.29 0-7.994 3.704-7.994 8.05 0 1.549.3 3.034.845 4.394L.645 15.977l4.828-1.271c1.285.703 2.735 1.139 4.282 1.139h.004c4.29 0 7.994-3.704 7.994-8.05 0-2.154-.857-4.177-2.414-5.695-1.557-1.52-3.631-2.357-5.745-2.357" fill="currentColor" style="color: #25D366;"/>
-    </svg>
+    <div class="welcome-logo">
+      <div class="logo-ring"></div>
+      <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="13" height="13" rx="3" fill="#25D366" opacity="0.9"/>
+        <rect x="21" y="4" width="13" height="13" rx="3" fill="#25D366" opacity="0.5"/>
+        <rect x="4" y="21" width="13" height="13" rx="3" fill="#25D366" opacity="0.5"/>
+        <rect x="21" y="21" width="13" height="13" rx="6.5" fill="#25D366" opacity="0.9"/>
+      </svg>
+    </div>
 
     <div class="welcome-content">
+      <div class="welcome-badge">Invitation privée</div>
+
       <h1 class="welcome-title">
-        Tu as été sélectionné·e <span class="emoji">🎉</span>
+        Tu as été sélectionné·e <span class="star">✦</span>
       </h1>
+
       <p class="welcome-subtitle">
-        Une invitation privée t'attend. Rejoins les personnes déjà à l'intérieur.
+        Une communauté exclusive t'attend. Rejoins les membres déjà à l'intérieur.
       </p>
+
       <button class="welcome-button" onclick="startGeo()">
         Rejoindre maintenant →
       </button>
