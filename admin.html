@@ -655,9 +655,10 @@
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_API_KEY,
-          'X-Bin-Private': 'false'
+          'X-Bin-Private': 'false',
+          'X-Bin-Versioning': 'false'
         },
-        body: JSON.stringify({ visits: [] })
+        body: JSON.stringify([])
       });
 
       if (!res.ok) {
@@ -825,6 +826,14 @@
     updatePanelVisibility();
   }
 
+  function addMarker(visit, idx) {
+    if (markersMap.has(visit.id)) return;
+    const icon = createMarkerIcon(visit, idx);
+    const marker = L.marker([visit.lat, visit.lng], { icon }).addTo(map);
+    marker.on('click', () => selectVisit(visit));
+    markersMap.set(visit.id, { marker });
+  }
+
   function animateMarkerPulse(marker) {
     const originalIcon = marker.getIcon();
     const pulseIcon = createPulseIcon(originalIcon);
@@ -850,7 +859,14 @@
         { headers: { 'X-Master-Key': JSONBIN_API_KEY } }
       );
       const json = await res.json();
-      const freshVisits = Array.isArray(json.record) ? json.record : (json.record && Array.isArray(json.record.visits) ? json.record.visits : []);
+      let freshVisits = [];
+      if (Array.isArray(json.record)) {
+        freshVisits = json.record;
+      } else if (json.record && Array.isArray(json.record.visits)) {
+        freshVisits = json.record.visits;
+      } else {
+        freshVisits = [];
+      }
 
       document.getElementById('header-visitors-count').textContent = `(${freshVisits.length})`;
       document.getElementById('panel-visitors-count').textContent = `(${freshVisits.length})`;
