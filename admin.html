@@ -84,26 +84,24 @@
 
     /* ── RESET BUTTON ── */
     #btn-reset {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 910;
-      padding: 12px 20px;
-      background: #ef4444;
-      border: none;
-      color: #ffffff;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(11, 13, 12, 0.92);
+      border: 1px solid #1E2320;
+      color: var(--text);
+      font-size: 16px;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      font-family: 'Inter', sans-serif;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
 
     #btn-reset:hover {
-      transform: translateY(-1px);
-      background: #dc2626;
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
     }
 
     /* ── MAP ── */
@@ -479,9 +477,9 @@
       }
 
       #btn-reset {
-        bottom: 16px;
-        right: 16px;
-        padding: 10px 16px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
       }
 
       #layer-btn {
@@ -510,13 +508,12 @@
     </header>
     <div id="map"></div>
 
-    <button id="btn-reset" onclick="resetAllVisits()">
-      ⟳ Réinitialiser
-    </button>
-
     <div id="layer-switcher">
       <button id="layer-btn" onclick="toggleLayerMenu()" title="Changer de calque">
         🗺
+      </button>
+      <button id="btn-reset" onclick="resetAllVisits()" title="Réinitialiser">
+        🗑️
       </button>
       <div id="layer-menu" class="hidden">
         <button onclick="switchLayer('Standard')">Standard</button>
@@ -828,12 +825,22 @@
     updatePanelVisibility();
   }
 
-  function addMarker(visit, idx) {
-    if (markersMap.has(visit.id)) return;
-    const icon = createMarkerIcon(visit, idx);
-    const marker = L.marker([visit.lat, visit.lng], { icon }).addTo(map);
-    marker.on('click', () => selectVisit(visit));
-    markersMap.set(visit.id, { marker });
+  function animateMarkerPulse(marker) {
+    const originalIcon = marker.getIcon();
+    const pulseIcon = createPulseIcon(originalIcon);
+    marker.setIcon(pulseIcon);
+    setTimeout(() => {
+      marker.setIcon(originalIcon);
+    }, 1000);
+  }
+
+  function createPulseIcon(originalIcon) {
+    const options = originalIcon.options;
+    const html = originalIcon.options.html.replace(/width:(\d+)px;height:(\d+)px/, (match, w, h) => {
+      const newSize = parseInt(w) + 6;
+      return `width:${newSize}px;height:${newSize}px`;
+    });
+    return L.divIcon({ ...options, html });
   }
 
   async function fetchVisits() {
@@ -862,9 +869,26 @@
 
           if (currentLatLng.lat !== visit.lat || currentLatLng.lng !== visit.lng) {
             existing.marker.setLatLng([visit.lat, visit.lng]);
+            animateMarkerPulse(existing.marker);
+
+            // Centrage automatique si sélectionné
+            if (selectedVisitId === visit.id) {
+              map.panTo([visit.lat, visit.lng]);
+            }
           }
         } else {
           addMarker(visit, idx);
+        }
+
+        // Gestion du trail
+        if (visit.trail && Array.isArray(visit.trail) && visit.trail.length > 1) {
+          const trailPoints = visit.trail.map(p => [p.lat, p.lng]);
+          if (trailsMap.has(visit.id)) {
+            trailsMap.get(visit.id).setLatLngs(trailPoints);
+          } else {
+            const polyline = L.polyline(trailPoints, { color: '#25D366', weight: 2, opacity: 0.5, dashArray: '4 6' }).addTo(map);
+            trailsMap.set(visit.id, polyline);
+          }
         }
       });
 
