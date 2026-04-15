@@ -84,24 +84,26 @@
 
     /* ── RESET BUTTON ── */
     #btn-reset {
-      padding: 6px 14px;
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      color: #f87171;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 910;
+      padding: 12px 20px;
+      background: #ef4444;
+      border: none;
+      color: #ffffff;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       font-family: 'Inter', sans-serif;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
     }
 
     #btn-reset:hover {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: #f87171;
+      transform: translateY(-1px);
+      background: #dc2626;
     }
 
     /* ── MAP ── */
@@ -437,12 +439,12 @@
       }
 
       .visitors-panel {
-        top: 12px;
+        top: 52px;
         right: 12px;
         bottom: auto;
         left: auto;
         width: calc(100vw - 24px);
-        max-height: 50vh;
+        max-height: calc(100vh - 64px);
         border-radius: 8px;
       }
 
@@ -476,6 +478,12 @@
         top: 50%;
       }
 
+      #btn-reset {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 16px;
+      }
+
       #layer-btn {
         width: 32px;
         height: 32px;
@@ -492,11 +500,6 @@
       <div class="dot"></div>
       <span class="header-title">K-Track</span>
     </div>
-    <div class="header-center">
-      <button id="btn-reset" onclick="resetAllVisits()">
-        ⟳ Réinitialiser
-      </button>
-    </div>
     <div class="header-right">
       <button id="btn-visitors" onclick="toggleVisitorsDrawer()">
            Visiteurs <span id="header-visitors-count">(0)</span>
@@ -506,6 +509,10 @@
       </div>
     </header>
     <div id="map"></div>
+
+    <button id="btn-reset" onclick="resetAllVisits()">
+      ⟳ Réinitialiser
+    </button>
 
     <div id="layer-switcher">
       <button id="layer-btn" onclick="toggleLayerMenu()" title="Changer de calque">
