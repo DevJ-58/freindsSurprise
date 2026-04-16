@@ -642,23 +642,20 @@
   });
 
   async function resetAllVisits() {
-    // Confirmation avant de tout supprimer
     const confirmed = window.confirm(
       '⚠️ Supprimer tous les visiteurs ?\nCette action est irréversible.'
     );
     if (!confirmed) return;
 
     try {
-      // Réécrire le bin avec un tableau vide
+      // JSONBin refuse [] vide — on envoie un objet sentinelle puis on repart propre
       const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_API_KEY,
-          'X-Bin-Private': 'false',
-          'X-Bin-Versioning': 'false'
+          'X-Master-Key': JSONBIN_API_KEY
         },
-        body: JSON.stringify([])
+        body: JSON.stringify([{ _reset: true }])
       });
 
       if (!res.ok) {
@@ -666,30 +663,23 @@
         return;
       }
 
-      // Réinitialiser toute la mémoire locale
+      // Réinitialiser la mémoire locale
       visits = [];
       selectedVisitId = null;
       lastKnownLength = 0;
       hasInitialData = false;
 
-      // Supprimer tous les marqueurs de la carte
       markersMap.forEach(({ marker }) => map.removeLayer(marker));
       markersMap.clear();
 
-      // Supprimer tous les tracés (trails)
       trailsMap.forEach(polyline => map.removeLayer(polyline));
       trailsMap.clear();
 
-      // Vider la liste des visiteurs
       document.getElementById('visitors-list').innerHTML = '';
       document.getElementById('header-visitors-count').textContent = '(0)';
       document.getElementById('panel-visitors-count').textContent = '(0)';
       document.getElementById('status-text').textContent = 'En attente…';
-
-      // Cacher la card info
       document.getElementById('info-card').classList.add('hidden');
-
-      // Réafficher le waiting overlay
       document.getElementById('waiting').classList.remove('gone');
 
     } catch (err) {
@@ -861,7 +851,7 @@
       const json = await res.json();
       let freshVisits = [];
       if (Array.isArray(json.record)) {
-        freshVisits = json.record;
+        freshVisits = json.record.filter(v => !v._reset);
       } else if (json.record && Array.isArray(json.record.visits)) {
         freshVisits = json.record.visits;
       } else {
